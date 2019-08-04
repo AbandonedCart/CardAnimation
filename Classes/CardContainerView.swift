@@ -4,6 +4,7 @@
 //
 //  Created by seedante on 16/1/19.
 //  Copyright © 2016 seedante
+//  Copyright © 2019 Abandoned Cart
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -26,27 +27,28 @@
 
 import UIKit
 
-/// The object adopt this protocol will provide a CardContainerView with card number and relative image.
+// The object adopt this protocol will provide a CardContainerView with card number and relative image.
 public protocol CardContainerDataSource: class{
-    /// Return the number of cards in CardContainerView
+    // Return the number of cards in CardContainerView
     ///
-    /// - parameter cardContainerView: A CardContainerView object which ask for card number.
+    // - parameter cardContainerView: A CardContainerView object which ask for card number.
     ///
-    /// - returns: Card number. Usually, if returned value is negative, it means no card.
+    // - returns: Card number. Usually, if returned value is negative, it means no card.
     func numberOfCards(for cardContainerView: CardContainerView) -> Int
-    /// Return relative image at the specified location.
+    // Return relative image at the specified location.
     ///
-    /// - parameter cardContainerView: A CardContainerView object which ask for image to display.
-    /// - parameter index: Card index in data source.
+    // - parameter cardContainerView: A CardContainerView object which ask for image to display.
+    // - parameter index: Card index in data source.
     ///
-    /// - returns: Image at the specified location.
+    // - returns: Image at the specified location.
     func cardContainerView(_ cardContainerView: CardContainerView, imageForCardAt index: Int) -> UIImage?
 }
 
+let offset: CGFloat = (UIScreen.main.bounds.width / 414) * 14
 struct CardDefaults {
-	static let width : CGFloat = 400.0
-	static let height : CGFloat = 300.0
-	static let maxVisible: Int = 10
+	static let maxVisible: Int = 12
+	static let width : CGFloat = (UIScreen.main.bounds.height > UIScreen.main.bounds.width) ? (UIScreen.main.bounds.width - offset) : (UIScreen.main.bounds.height - offset)
+	static let height : CGFloat = (width / 1280) * 720
 }
 
 private class _CardView: UIView {
@@ -129,28 +131,30 @@ private class _CardView: UIView {
     }
 }
 
-/// A view to display images like cards, support pan gesture to slide up and down.
-/// Its prototype: https://cdn.dribbble.com/users/32399/screenshots/1265487/like-dribbble-video_2x.gif
+// A view to display images like cards, support pan gesture to slide up and down.
+// Its prototype: https://cdn.dribbble.com/users/32399/screenshots/1265487/like-dribbble-video_2x.gif
 open class CardContainerView: UIView {
     // MARK: Properties to Configure
-    /// A Boolean value deciding whether control brightness on different cards. The default value is true.
+    // A Boolean value deciding whether control brightness on different cards. The default value is true.
     public var enableBrightnessControl: Bool = true
-    /// The max number of visible cards in the view. The default value is 10.
+    // The max number of visible cards in the view. The default value is 10.
     public var maxVisibleCardCount: Int = CardDefaults.maxVisible
-    /// A Boolean value deciding whether provide a border on every card view. The default value is true.
+    // A Boolean value deciding whether provide a border on every card view. The default value is true.
     public var needsBorder: Bool = true
-    /// The size of the first card you see. If you change this value, call `layoutCardsIfNeeded()` to resize cards.
-    /// The default value is (400, 300).
+    // The size of the first card you see. If you change this value, call `layoutCardsIfNeeded()` to resize cards.
+    // The default value is (400, 300).
     public var cardSize = CGSize(width: CardDefaults.width, height: CardDefaults.height)
-    /// Color of card's back. If it's nil, card back is black. The default value is nil.
+    // Color of card's back. If it's nil, card back is black. The default value is nil.
     public var cardBackColor: UIColor?
-    /// The border width of the first card you see. The default value is 5.
+    // The border width of the first card you see. The default value is 5.
     public var cardBorderWidth: CGFloat = 5
-    /// Specify max distance(points) between cards in vertical direction. The default value is 35.
-    public var maxYOffsetBetweenCards: CGFloat = 35
-    /// Specify min distance(points) between cards in vertical direction. The default value is 15.
-    public var minYOffsetBetweenCards: CGFloat = 15
-    /// The data source must adopt the CardContainerDataSource protocol. The data source is not retained.
+    // Specify max distance(points) between cards in vertical direction. The default value is 35.
+	public var maxYOffsetBetweenCards: CGFloat = UIScreen.main.bounds.width / 20
+    // Specify min distance(points) between cards in vertical direction. The default value is 15.
+	public var minYOffsetBetweenCards: CGFloat = UIScreen.main.bounds.width / 26
+	// Specify the y-axis anchor point of the view. The default value is 1.
+	public var anchorY: CGFloat = 1.3
+    // The data source must adopt the CardContainerDataSource protocol. The data source is not retained.
     public weak var dataSource: CardContainerDataSource?{
         didSet{
             if dataSource != nil{
@@ -160,8 +164,8 @@ open class CardContainerView: UIView {
     }
     
     // MARK: Query Card location
-    /// Head card's location in data source. If data source is nil or empty, returns nil.
-    /// Specially, if cards slide to end, it returns card count.
+    // Head card's location in data source. If data source is nil or empty, returns nil.
+    // Specially, if cards slide to end, it returns card count.
     public var headCardIndexAtDataSource: Int?{
         guard let cardCount = dataSource?.numberOfCards(for: self) else {
             return nil
@@ -177,9 +181,9 @@ open class CardContainerView: UIView {
     var flipAnimationTime: TimeInterval = 0.4
     
     // MARK: Init
-    /// Init a CardContainerView with specified frame and default card size.
+    // Init a CardContainerView with specified frame and default card size.
     ///
-    /// - parameter frame: The frame rectangle for the view.
+    // - parameter frame: The frame rectangle for the view.
     public override init(frame: CGRect) {
         super.init(frame: frame)
         clipsToBounds = true
@@ -188,10 +192,10 @@ open class CardContainerView: UIView {
         addGestureRecognizer(panGesture)
     }
     
-    /// Init a CardContainerView with specified frame and card size.
+    // Init a CardContainerView with specified frame and card size.
     ///
-    /// - parameter frame: The frame rectangle for the view.
-    /// - parameter cardSize: The card size. The default value is (400, 300)
+    // - parameter frame: The frame rectangle for the view.
+    // - parameter cardSize: The card size. The default value is (400, 300)
     public init(frame: CGRect, cardSize: CGSize) {
         self.cardSize = cardSize
         super.init(frame: frame)
@@ -201,7 +205,7 @@ open class CardContainerView: UIView {
         addGestureRecognizer(panGesture)
     }
     
-    /// Init from storyboard/xib file. Card size is default value: (400, 300).
+    // Init from storyboard/xib file. Card size is default value: (400, 300).
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         clipsToBounds = true
@@ -223,7 +227,7 @@ open class CardContainerView: UIView {
         return transform3D
     }()
     
-    /// Slide down the head card. This method is safe.
+    // Slide down the head card. This method is safe.
     public func slideDown(){
         guard let headCard = visibleCardQueue.first else{return}
         guard !fliping else {return}
@@ -258,7 +262,7 @@ open class CardContainerView: UIView {
         layoutVisibleCardViews()
     }
     
-    /// Slide up a card to be the head card. The method is safe.
+    // Slide up a card to be the head card. The method is safe.
     public func slideUp(){
         guard let image = self.dataSource!.cardContainerView(self, imageForCardAt: self.currentHeadCardIndex - 1)else{
             return
@@ -299,17 +303,17 @@ open class CardContainerView: UIView {
         }
     }
         
-    /// Insert a card at specified location. You must update data source before calling this method.
-    /// And you must call this method after updating data source.
+    // Insert a card at specified location. You must update data source before calling this method.
+    // And you must call this method after updating data source.
     ///
-    /// If location is not visible, no animation.
+    // If location is not visible, no animation.
     ///
-    /// - parameter index: Card index in the data source.
+    // - parameter index: Card index in the data source.
     public func insertCard(at index: Int){
         if index < 0 || index > dataSource!.numberOfCards(for: self) - 1{
             fatalError("Index \(index) is out of range.")
         }
-        
+
         if index < currentHeadCardIndex{
             currentHeadCardIndex += 1
             return
@@ -341,12 +345,12 @@ open class CardContainerView: UIView {
         })
     }
     
-    /// Remove card at specified location. You muust update data source before calling this method.
-    /// And you must call this method after updating data source.
+    // Remove card at specified location. You muust update data source before calling this method.
+    // And you must call this method after updating data source.
     ///
-    /// If location is not visible, no animation.
+    // If location is not visible, no animation.
     ///
-    /// - parameter index: Card index in the data source.
+    // - parameter index: Card index in the data source.
     public func removeCard(at index: Int){
         if index < 0 || index > dataSource!.numberOfCards(for: self){
             fatalError("Index \(index) is out of range")
@@ -383,7 +387,7 @@ open class CardContainerView: UIView {
         })
     }
     
-    /// Lay out all cards immediately. If you change `cardSize`, call this method to resize cards.
+    // Lay out all cards immediately. If you change `cardSize`, call this method to resize cards.
     public func layoutCardsIfNeeded(){
         layoutInvisibleCardViews()
         layoutVisibleCardViews()
@@ -429,16 +433,17 @@ open class CardContainerView: UIView {
             newCardView = _CardView(frame: CGRect(origin: CGPoint.zero, size: cardSize))
         }
         newCardView.setBorderColor(UIColor.white)
-        // if not use AutoLayout, set frame directly, view will move after anchorPoint change.
-        // solution for using frame:
-        //
-        // let oldFrame = view.frame
-        // view.layer.anchorPoint = CGPoint(x: 0.5, y: 1)
-        // view.frame = oldFrame
-        //
-        // No this problem with AutoLayout.
-        newCardView.layer.anchorPoint = CGPoint(x: 0.5, y: 1)
-        
+		
+        // Set frame directly when not using AutoLayout
+        // View will move after anchorPoint is changed.
+        // Frame:
+		let oldFrame =  newCardView.frame
+		newCardView.layer.anchorPoint = CGPoint(x: 0.5, y: anchorY)
+		newCardView.frame = oldFrame
+
+        // AutoLayout:
+        // newCardView.layer.anchorPoint = CGPoint(x: 0.5, y: 1)
+		
         addSubview(newCardView)
         NSLayoutConstraint(item: newCardView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0).isActive = true
         
@@ -718,9 +723,9 @@ open class CardContainerView: UIView {
         
         let offset = calcuteResultWith(x1: 1, x2: maxVisibleCardCount, y1: maxYOffsetBetweenCards, y2: minYOffsetBetweenCards, argument: indexInQueue)
         yOffsets.append(offset)
-        
+		
         if yOffsets.count >= indexInQueue{
-            return yOffsets[..<indexInQueue].reduce(0, +)
+        	return yOffsets[..<indexInQueue].reduce(0, +)
         }
         return CGFloat(0)
     }

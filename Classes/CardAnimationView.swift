@@ -4,6 +4,7 @@
 //
 //  Created by Luis Sanchez Garcia on 14/10/15.
 //  Copyright © 2016 seedante
+//  Copyright © 2019 Abandoned Cart
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -86,11 +87,11 @@ open class ImageCardView: BaseCardView {
 }
 
 
-/// View to display a list of cards featuring a flipping up and down animation effect.
+// View to display a list of cards featuring a flipping up and down animation effect.
 open class CardAnimationView: UIView {
 
     // MARK: Public properties
-    /// Data source delegate, class won't work until it's set.
+    // Data source delegate, class won't work until it's set.
     open weak var dataSourceDelegate : CardAnimationViewDataSource? {
         didSet { // Only start to work if delegate is set
             if dataSourceDelegate != nil {
@@ -99,10 +100,10 @@ open class CardAnimationView: UIView {
         }
     }
     
-    /// Animation speed for the cards animations.
+    // Animation speed for the cards animations.
     open var animationsSpeed = 0.2
     
-    /// Defines the card size that will be used. (width, height)
+    // Defines the card size that will be used. (width, height)
     open var cardSize : (width:CGFloat, height:CGFloat) {
         didSet { // Only reset when delegate is set
             if dataSourceDelegate != nil {
@@ -179,7 +180,7 @@ open class CardAnimationView: UIView {
     
     // MARK: Public
     
-    /// Reloads the cards of the animated cards view.
+    // Reloads the cards of the animated cards view.
     open func reloadData() {
         configure()
     }
